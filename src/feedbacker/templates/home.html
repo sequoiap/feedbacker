@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #336699; }
+    </style>
+{% endblock %}
+{% block content %}
+    <h1>Index</h1>
+    <p class="important">
+      Welcome to my awesome homepage.
+    </p>
+    <p>Hello, World!</p>
+
+    <div class="list-group">
+      <a href="#" class="list-group-item list-group-item-action">Homework 1</a>
+      <a href="#" class="list-group-item list-group-item-action">Homework 2</a>
+      <a href="#" class="list-group-item list-group-item-action">Homework 3</a>
+    </div>
+
+    <form data-bitwarden-watching="1">
+      <fieldset>
+        <div>
+          <label for="exampleInputEmail1" class="form-label mt-4">Email address</label>
+          <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+          <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+        </div>
+        <div>
+          <label for="exampleInputPassword1" class="form-label mt-4">Password</label>
+          <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password" autocomplete="off">
+        </div>
+        <div>
+          <label for="exampleTextarea" class="form-label mt-4">Example textarea</label>
+          <textarea class="form-control" id="exampleTextarea" rows="3"></textarea>
+        </div>
+        <div>
+          <label for="formFile" class="form-label mt-4">Default file input example</label>
+          <input class="form-control" type="file" id="formFile">
+        </div>
+      </fieldset>
+    </form>
+{% endblock %}
