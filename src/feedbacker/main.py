@@ -3,7 +3,7 @@ import logging
 from os import path
 from uuid import uuid1
 from typing import Optional, Final
-# from contextvars import ContextVar
+from contextvars import ContextVar
 
 from fastapi import FastAPI, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -15,7 +15,7 @@ from pydantic import ValidationError
 from jinja2 import Environment, FileSystemLoader
 
 # from sqlalchemy import inspect
-# from sqlalchemy.orm import scoped_session
+from sqlalchemy.orm import scoped_session
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.requests import Request
@@ -29,7 +29,7 @@ from .config import (
     TEMPLATE_DIR,
 )
 from .frontend import frontend
-# from .database.core import engine, sessionmaker
+from .database import SessionLocal, engine, sessionmaker
 # from .extensions import configure_extensions
 # from .logging import configure_logging
 # from .metrics import provider as metric_provider
@@ -64,11 +64,42 @@ api = FastAPI(
     title="Feedbacker",
     description="Welcome to feedbacker's API documentation! Here you will able to discover all of the ways you can interact with the feedbacker API.",
     root_path="/api/v1",
-    docs_url=None,
+    docs_url="/docs",
     openapi_url="/docs/openapi.json",
-    redoc_url="/docs",
+    redoc_url="/redocs",
 )
 api.add_middleware(GZipMiddleware, minimum_size=1000)
+
+
+REQUEST_ID_CTX_KEY: Final[str] = "request_id"
+_request_id_ctx_var: ContextVar[Optional[str]] = ContextVar(REQUEST_ID_CTX_KEY, default=None)
+
+
+def get_request_id() -> Optional[str]:
+    return _request_id_ctx_var.get()
+
+
+@api.middleware("http")
+async def db_session_middleware(request: Request, call_next):
+    request_id = str(uuid1())
+
+    # we create a per-request id such that we can ensure that our session is scoped for a particular request.
+    # see: https://github.com/tiangolo/fastapi/issues/726
+    ctx_token = _request_id_ctx_var.set(request_id)
+    # path_params = get_path_params_from_request(request)
+
+    try:
+        # session = scoped_session(sessionmaker)#, scopefunc=get_request_id)
+        session = SessionLocal
+        request.state.db = session()
+        response = await call_next(request)
+    except Exception as e:
+        raise e
+    finally:
+        request.state.db.close()
+
+    _request_id_ctx_var.reset(ctx_token)
+    return response
 
 
 # we add all API routes to the Web API framework
