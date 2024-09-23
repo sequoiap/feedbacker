@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import bcrypt
 import jwt
@@ -37,7 +37,7 @@ class User(Base):
     
     @property
     def token(self):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         exp = (now + timedelta(seconds=FEEDBACKER_JWT_EXP)).timestamp()
         data = {
             "exp": exp,
