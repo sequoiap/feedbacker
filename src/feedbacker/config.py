@@ -62,6 +62,7 @@ templates = Jinja2Templates(env=env)
 # DEFAULT_DATABASE_FILE = os.path.join(
 #     os.path.abspath(os.path.dirname(__file__)), os.path.join("static")
 # )
+# DEFAULT_DATABASE_FILE = "sqlite+aiosqlite:///./data.db"
 DEFAULT_DATABASE_FILE = "sqlite:///./data.db"
 # SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
 SQLALCHEMY_DATABASE_URL = config("STATIC_DIR", default=DEFAULT_DATABASE_FILE)

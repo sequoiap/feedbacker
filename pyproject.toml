@@ -41,7 +41,8 @@ classifiers = [
 
 dependencies = [
     "fastapi == 0.114.0",
-    "sqlalchemy == 2.0.34",
+    "sqlalchemy[asyncio] == 2.0.34",
+    "aiosqlite == 0.20.0",
     "sqlalchemy_utils == 0.41.2",
     "bcrypt == 4.2.0",
     "PyJWT == 2.9.0",
