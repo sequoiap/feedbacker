@@ -8,3 +8,17 @@ For each app, you need to:
 1. Import its frontend views and add it to the toplevel frontend in frontend.py
 1. Import its backend views and add it to the API in api.py
 1. Configure the templates environment variable to make yours discoverable in config.py
+
+## Running the app
+
+In developer mode:
+
+```bash
+fastapi dev .\src\feedbacker\main.py
+```
+
+In production mode:
+
+```bash
+fastapi run .\src\feedbacker\main.py
+```
