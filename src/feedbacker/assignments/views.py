@@ -13,13 +13,25 @@ from fastapi.templating import Jinja2Templates
 #     CaseCostTypeRead,
 #     CaseCostTypeUpdate,
 # )
+from feedbacker.auth.service import CurrentUser
 from feedbacker.config import templates
+from feedbacker.database import DbSession
 
 from .schemas import AssignmentCreate, AssignmentRead, AssignmentUpdate
-from .service import create, delete, get, update
+from .service import create, delete, get, update, get_all_assignments
 
 api_router = APIRouter()
-frontend = FastAPI(debug=True)
+# frontend = FastAPI(debug=True)
+frontend = APIRouter()
+
+
+@api_router.get("/")
+async def get_assignments(
+    db_session: DbSession,
+    current_user: CurrentUser,
+) -> list[AssignmentRead]:
+    """Get all assignments."""
+    return get_all_assignments(db_session)
 
 
 @frontend.get("/", response_class=HTMLResponse)
