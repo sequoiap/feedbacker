@@ -1,19 +1,33 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Table
+from sqlalchemy.orm import Mapped, relationship, mapped_column
 
 from feedbacker.database import Base
 
 
+course_instrcutors = Table(
+    "course_instructors",
+    Base.metadata,
+    Column("course_id", Integer, ForeignKey("courses.id")),
+    Column("instructor_id", Integer, ForeignKey("users.id")),
+)
+
+course_students = Table(
+    "course_students",
+    Base.metadata,
+    Column("course_id", Integer, ForeignKey("courses.id")),
+    Column("student_id", Integer, ForeignKey("users.id")),
+)
+
 class Course(Base):
-    __tablename__ = "assignments"
+    __tablename__ = "courses"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    description = Column(String, index=True)
-    created_at = Column(DateTime, default=datetime.now)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(index=True)
+    description: Mapped[str]
+    created_at: Mapped[datetime] = mapped_column(default=datetime.now)
 
-    user = relationship("User", back_populates="assignments")
+    instructors = relationship("User")
+    students = relationship("User")
     # feedbacks = relationship("Feedback", back_populates="assignment")
