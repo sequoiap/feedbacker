@@ -5,7 +5,8 @@ import click
 import uvicorn
 
 from feedbacker import __version__, config
-# from feedbacker.enums import UserRoles
+
+# from feedbacker.enums import UserRolesEnum
 # from feedbacker.plugin.models import PluginInstance
 
 # from .extensions import configure_extensions
@@ -64,6 +65,7 @@ def database_init():
 #         click.secho(
 #             f"Database '{database_hostname}:{database_name}' does not exist!!!", fg="red"
 #         )
+
 
 def entrypoint():
     """The entry that the CLI is executed from"""

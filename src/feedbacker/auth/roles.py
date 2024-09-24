@@ -22,11 +22,9 @@ class FeedbackerEnum(StrEnum):
         False depending on whether the value is a member or the value of a member
     """
 
-    pass  # No additional implementation needed
 
-
-class UserRoles(FeedbackerEnum):
-    admin = "Admin"
-    dev = "Dev"
-    instructor = "Instructor"
-    student = "Student"
+class UserRolesEnum(FeedbackerEnum):
+    admin = "admin"
+    dev = "dev"
+    instructor = "instructor"
+    student = "student"

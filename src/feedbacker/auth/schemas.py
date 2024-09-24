@@ -36,14 +36,14 @@ class UserLogin(UserBase):
         return v
 
 
-class UserRegister(UserLogin):
-    password: str = Field(validate_default=True)
+# class UserRegister(UserLogin):
+#     password: str = Field(validate_default=True)
 
-    @field_validator("password")
-    @classmethod
-    def password_required(cls, v):
-        password = v
-        return hash_password(password)
+#     @field_validator("password")
+#     @classmethod
+#     def password_required(cls, v):
+#         password = v
+#         return hash_password(password)
 
 
 class UserLoginResponse(FeedbackerBase):
@@ -52,6 +52,9 @@ class UserLoginResponse(FeedbackerBase):
 
 class UserRead(UserBase):
     id: int
+    username: str
+    firstname: str
+    lastname: str
     roles: list[str] = Field([])
 
 
@@ -71,6 +74,8 @@ class UserCreate(FeedbackerBase):
     email: EmailStr
     username: str
     password: str = Field(validate_default=True)
+    firstname: str
+    lastname: str
     role: list[str] = []
 
     @field_validator("password")
@@ -79,9 +84,18 @@ class UserCreate(FeedbackerBase):
         return hash_password(str(v))
 
 
-class UserRegisterResponse(FeedbackerBase):
-    token: Optional[str] = Field(None, nullable=True)
+# class UserRegisterResponse(FeedbackerBase):
+#     token: Optional[str] = Field(None, nullable=True)
 
 
 class UserPagination(Pagination):
     items: List[UserRead] = []
+
+
+class Token(FeedbackerBase):
+    access_token: str
+    token_type: str
+
+
+class TokenData(FeedbackerBase):
+    username: str | None = None
