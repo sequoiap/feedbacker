@@ -1,3 +1,4 @@
+from typing import Optional
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
@@ -18,6 +19,16 @@ class User(Base):
     """User model.
     
     Passwords are hashed using bcrypt.
+
+    Args:
+        username: The user's username.
+        password: The user's password.
+        email: The user's email address.
+        firstname: The user's first name.
+        lastname: The user's last name.
+        created_at: The date and time the user was created (default now).
+        updated_at: The date and time the user was last updated (default now).
+        last_login_time: The date and time the user last logged.
     """
     __tablename__ = "users"
 
@@ -29,7 +40,7 @@ class User(Base):
     lastname: Mapped[str]
     created_at: Mapped[datetime] = mapped_column(default=datetime.now)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.now)
-    last_login_time: Mapped[datetime] = mapped_column(nullable=True)
+    last_login_time: Mapped[Optional[datetime]] = mapped_column(nullable=True)
 
     roles = relationship("UserRoles", back_populates="user")
 
@@ -47,7 +58,7 @@ class User(Base):
         }
         return jwt.encode(data, key=FEEDBACKER_JWT_SECRET, algorithm=FEEDBACKER_JWT_ALG)
 
-    def get_roles(self):
+    def get_roles(self) -> list[str]:
         """Gets the user's role for a given organization slug."""
         return [role.role for role in self.roles]
 

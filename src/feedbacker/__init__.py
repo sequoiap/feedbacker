@@ -9,7 +9,9 @@ except Exception:
     VERSION = "unknown"
 
 try:
-    from feedbacker.assignments.models import Assignment
+    from feedbacker.auth.models import User  # noqa
+    from feedbacker.courses.models import Course  # noqa
+    from feedbacker.assignments.models import Assignment  # noqa
 except Exception:
     print(traceback.format_exc())
 

@@ -1,0 +1,58 @@
+{% extends "course_base.html.j2" %}
+{% set active_page = "grades" %}
+
+{% block title %}Grades{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #336699; }
+    </style>
+{% endblock %}
+{% block content %}
+    <h1>Grades</h1>
+    <p class="important">
+      Welcome to my awesome grades page.
+    </p>
+    <p>Hello, World!</p>
+
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col">Assignment</th>
+          <th scope="col">Grade</th>
+          <th scope="col">Attempts</th>
+          <th scope="col">Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="align-middle">
+          <td scope="row">Homework 1</td>
+          <td>10 / 10</td>
+          <td>3</td>
+          <td><button type="button" class="btn btn-primary">Details</button></td>
+        </tr>
+        <tr class="align-middle">
+          <td scope="row">Homework 2</td>
+          <td>10 / 10</td>
+          <td>3</td>
+          <td><button type="button" class="btn btn-primary">Details</button></td>
+        </tr>
+        <tr class="align-middle">
+          <td scope="row">Homework 3</td>
+          <td>- / 10</td>
+          <td>0</td>
+          <td><button type="button" class="btn btn-primary">Details</button></td>
+        </tr>
+      </tbody>
+    </table>
+
+    {# <div class="list-group">
+      {% for assignment in assignments %}
+        <a href="{{ url_for('assignment_details', course_id=course.id, assignment_id=assignment.id) }}" class="list-group-item list-group-item-action">
+          {{ assignment.title }}
+        </a>
+      {% else %}
+        <a href="#" class="list-group-item list-group-item-action fst-italic">No assignments found</a>
+      {% endfor %}
+    </div> #}
+{% endblock %}

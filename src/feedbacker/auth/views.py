@@ -23,10 +23,9 @@ from feedbacker.database import DbSession
 from .schemas import UserCreate, UserLogin, UserLoginResponse, UserRead, UserUpdate, UserPagination, Token
 from .service import CurrentUser, get_all_users, get, create, authenticate_user
 
+
 user_router = APIRouter()
 auth_router = APIRouter()
-# frontend = FastAPI(debug=True)
-# frontend = APIRouter()
 
 
 @user_router.get("/")

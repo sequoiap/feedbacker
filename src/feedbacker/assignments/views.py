@@ -20,9 +20,8 @@ from feedbacker.database import DbSession
 from .schemas import AssignmentCreate, AssignmentRead, AssignmentUpdate
 from .service import create, delete, get, update, get_all_assignments
 
+
 api_router = APIRouter()
-# frontend = FastAPI(debug=True)
-frontend = APIRouter()
 
 
 @api_router.get("/")
@@ -32,16 +31,3 @@ async def get_assignments(
 ) -> list[AssignmentRead]:
     """Get all assignments."""
     return get_all_assignments(db_session)
-
-
-@frontend.get("/", response_class=HTMLResponse)
-async def assignments(request: Request):
-    return templates.TemplateResponse(
-        request=request, name="assignment.html", context={}
-    )
-
-# @router.get("/{id}", response_class=HTMLResponse)
-# async def read_item(request: Request, id: str):
-#     return templates.TemplateResponse(
-#         request=request, name="assignment.html", context={"id": id}
-#     )

@@ -3,7 +3,7 @@ from contextlib import contextmanager
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session, DeclarativeBase
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy_utils import create_database, database_exists
 from starlette.requests import Request
@@ -24,7 +24,18 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-Base = declarative_base()
+class Base(DeclarativeBase):
+    """Base class for ORM models."""
+
+    def __repr__(self):
+        return "%s(%s)" % (
+            self.__class__.__name__,
+            ", ".join(
+                "%s=%s" % (k, self.__dict__[k])
+                for k in sorted(self.__dict__)
+                if "_sa_" != k[:4]
+            ),
+        )
 
 
 def init_database(engine):

@@ -1,0 +1,150 @@
+{% macro nav_link(endpoint, name) %}
+    {% if request.endpoint.endswith(endpoint) %}
+        <!-- <li class="active"><a href="{{ url_for(endpoint) }}">{{name}}</a></li> -->
+        <li class="nav-item">
+          <a class="nav-link active" href="/">Home
+            <span class="visually-hidden">(current)</span>
+          </a>
+        </li>
+    {% else %}
+        <!-- <li><a href="{{ url_for(endpoint) }}">{{name}}</a></li> -->
+        <li class="nav-item"></li>
+          <a class="nav-link" href="#">Courses</a>
+        </li>
+    {% endif %}
+{% endmacro %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- (href, id, caption) -->
+{% set navigation_bar = [
+  ('/', 'index', 'Home'),
+  ('/courses/', 'courses', 'Courses'),
+  ('/assignments/', 'assignments', 'Assignments'),
+  ('/history/', 'history', 'History'),
+  ('/about/', 'about', 'About')
+] -%}
+
+{% set course_navigation_bar = course_navigation_bar|default(
+  [
+    ('/', 'index', 'Home'),
+  ])
+-%}
+
+{% set active_page = active_page|default('index') -%}
+
+<head>
+  {% block head %}
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" async></script>
+  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
+
+  <title>{% block title %}{% endblock %} - Feedbacker</title>
+  {% endblock %}
+
+  <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">
+        <img src="/static/img/check-double_poly.svg" width="30" height="30" class="d-inline-block align-top" alt="">
+        Feedbacker
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01"
+        aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarColor01">
+        <ul class="navbar-nav me-auto flex-row flex-wrap">
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true"
+              aria-expanded="false">
+              {% if course is defined %}
+                {{ course.code }}: {{ course.name }}
+              {% else %}
+                All Courses
+              {% endif %}
+            </a>
+            <div class="dropdown-menu dropdown-menu-right">
+              {% for course in courses %}
+                <a class="dropdown-item" href="{{ url_for('course_home', course_id=course.id) }}">{{ course.code }}: {{ course.name }}</a>
+              {% endfor %}
+            </div>
+          </li>
+        </ul>
+
+        <ul class="navbar-nav flex-row flex-wrap">
+          <li class="nav-item dropdown"></li>
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true"
+              aria-expanded="false">Sequoia Ploeg</a>
+            <div class="dropdown-menu dropdown-menu-end">
+              <a class="dropdown-item" href="#">Profile</a>
+              <a class="dropdown-item" href="#">Settings</a>
+              <a class="dropdown-item" href="#">Admin</a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="#">Logout</a>
+            </div>
+          </li>
+        </ul>
+        <!-- <form class="d-flex">
+          <input class="form-control me-sm-2" type="search" placeholder="Search">
+          <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
+        </form> -->
+      </div>
+    </div>
+  </nav>
+
+  <nav class="navbar navbar-expand-lg bg-light" data-bs-theme="light">
+    <div class="container-fluid">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor03" aria-controls="navbarColor03" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarColor03">
+        <ul class="navbar-nav me-auto">
+
+          {% for href, id, caption in course_navigation_bar %}
+            <li class="nav-item">
+              <a
+                {% if id == active_page %} 
+                  class="nav-link active"
+                {% else %}
+                  class = "nav-link"
+                {% endif %}
+               href="{{ href|e }}">
+                {{ caption|e }}
+                {% if id == active_page %} 
+                  <span class="visually-hidden">(current)</span>
+                {% endif %}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+</head>
+
+<body>
+  <div class="container">
+    <!-- <div class="header">
+      <h1>Feedbacker</h1>
+      
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item active">Home</li>
+      </ol>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item active">Homework 1</li>
+      </ol>
+    </div> -->
+  
+    <div id="content" class="content" style="padding-top: 2rem;">{% block content %}{% endblock %}</div>
+
+    <div id="footer" style="padding-top: 20px;">
+      {% block footer %}
+      &copy; Copyright 2024 by <a href="https://github.com/sequoiap">Sequoia Ploeg</a>.
+      {% endblock %}
+    </div>
+  </div>
+</body>
+
+</html>

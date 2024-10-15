@@ -53,11 +53,11 @@ async def get_current_user(db_session: DbSession, token: Annotated[str, Depends(
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
-def get_current_role(
-    request: Request,
-    current_user: CurrentUser,
-) -> UserRolesEnum:
-    pass
+# def get_current_role(
+#     request: Request,
+#     current_user: CurrentUser,
+# ) -> UserRolesEnum:
+#     pass
 
 
 def get_all_users(request: Request) -> list[User]:
@@ -84,3 +84,28 @@ def create(db_session: DbSession, user_in: UserCreate) -> User:
     db_session.add(user)
     db_session.commit()
     return user
+
+
+class PermissionChecker:
+    """Check if a user has the required permissions.
+
+    Based on https://dev.to/moadennagi/role-based-access-control-using-fastapi-h59.
+    
+    Examples:
+        >>> @app.get('/items')
+        ... def items(
+        ...     authorize: bool = Depends(PermissionChecker(required_permissions=['items:read',]))
+        ... ):
+        ...     return 'items'
+    """
+    def __init__(self, required_permissions: list[str]) -> None:
+        self.required_permissions = required_permissions
+
+    def __call__(self, user: CurrentUser) -> bool:
+        for r_perm in self.required_permissions:
+            if r_perm not in user.get_roles():
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail='Permission denied.'
+                )
+        return True

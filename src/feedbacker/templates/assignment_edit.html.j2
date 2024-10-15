@@ -1,0 +1,107 @@
+{% extends "course_base.html.j2" %}
+{% set active_page = "assignments" %}
+
+{% block title %}Assignment Details{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #336699; }
+    </style>
+{% endblock %}
+{% block content %}
+    <h1>Edit assignment</h1>
+    <p class="important">
+      Welcome to my awesome Homework Details editing page.
+    </p>
+
+    <form data-bitwarden-watching="1">
+      <fieldset>
+        <div>
+          <label for="exampleInputEmail1" class="form-label mt-4">Assignment name</label>
+          <input type="text" class="form-control" aria-describedby="attemptsHelp" placeholder="{{ assignment.title }}">
+        </div>
+        <div>
+          <label for="exampleInputEmail1" class="form-label mt-4">Number of attempts</label>
+          <input type="number" class="form-control" aria-describedby="attemptsHelp" placeholder="1">
+          <small id="attemptsHelp" class="form-text text-muted">Enter -1 to allow infinite attempts.</small>
+        </div>
+        <div>
+          <label for="exampleInputEmail1" class="form-label mt-4">Due date</label>
+          <input type="date" class="form-control">
+        </div>
+        <div>
+          <label for="exampleInputEmail1" class="form-label mt-4">Time</label>
+          <input type="time" class="form-control" value="23:59">
+        </div>
+        <div>
+          <label for="exampleSelect1" class="form-label mt-4">Example select</label>
+          <select class="form-select" id="exampleSelect1">
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+          </select>
+        </div>
+        <div>
+          <label for="exampleTextarea" class="form-label mt-4">Assignment description</label>
+          <textarea class="form-control" id="exampleTextarea" aria-describedby="contentHelp" rows="10">
+          {{ assignment.content }}
+          </textarea>
+          <small id="contentHelp" class="form-text text-muted">Markdown is accepted.</small>
+        </div>
+        <div>
+          <label for="formFile" class="form-label mt-4">Grading script</label>
+          <input class="form-control" type="file" id="formFile">
+        </div>
+        <fieldset>
+          <legend class="mt-4">Radio buttons</legend>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked="">
+            <label class="form-check-label" for="optionsRadios1">
+              Option one is this and that—be sure to include why it's great
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
+            <label class="form-check-label" for="optionsRadios2">
+              Option two can be something else and selecting it will deselect option one
+            </label>
+          </div>
+          <div class="form-check disabled">
+            <input class="form-check-input" type="radio" name="optionsRadios" id="optionsRadios3" value="option3" disabled="">
+            <label class="form-check-label" for="optionsRadios3">
+              Option three is disabled
+            </label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend class="mt-4">Checkboxes</legend>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+            <label class="form-check-label" for="flexCheckDefault">
+              Default checkbox
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" checked="">
+            <label class="form-check-label" for="flexCheckChecked">
+              Checked checkbox
+            </label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend class="mt-4">Switches</legend>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+            <label class="form-check-label" for="flexSwitchCheckDefault">Default switch checkbox input</label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked="">
+            <label class="form-check-label" for="flexSwitchCheckChecked">Checked switch checkbox input</label>
+          </div>
+        </fieldset>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </fieldset>
+    </form>
+{% endblock %}

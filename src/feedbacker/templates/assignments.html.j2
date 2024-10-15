@@ -1,0 +1,28 @@
+{% extends "course_base.html.j2" %}
+{% set active_page = "assignments" %}
+
+{% block title %}Assignments{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #336699; }
+    </style>
+{% endblock %}
+{% block content %}
+    <h1>Assignments</h1>
+    <p class="important">
+      Welcome to my awesome assignments page.
+    </p>
+    <p>Hello, World!</p>
+
+    <div class="list-group">
+      {% for assignment in assignments %}
+        <a href="{{ url_for('assignment_details', course_id=course.id, assignment_id=assignment.id) }}" class="list-group-item list-group-item-action">
+          {{ assignment.title }}
+        </a>
+      {% else %}
+        {# <a href="#" class="list-group-item list-group-item-action fst-italic">No assignments found</a> #}
+        <span class="fst-italic">No assignments found</span>
+      {% endfor %}
+    </div>
+{% endblock %}

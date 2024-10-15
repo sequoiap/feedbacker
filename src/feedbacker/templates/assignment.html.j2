@@ -1,0 +1,60 @@
+{% extends "course_base.html.j2" %}
+{% set active_page = "assignments" %}
+
+{% block title %}Assignment Details{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #336699; }
+    </style>
+{% endblock %}
+{% block content %}
+    <h1>{{ assignment.title }}</h1>
+    <div class="col">
+      <a class="btn btn-primary mt-3" href="{{ url_for('edit_assignment_details', course_id=course.id, assignment_id=assignment.id) }}" role="button">Edit</a>
+      <a class="btn btn-danger mt-3" href="{{ url_for('edit_assignment_details', course_id=course.id, assignment_id=assignment.id) }}" role="button">Delete</a>
+    </div>
+    <p class="important">
+      Welcome to my awesome Homework Details page.
+    </p>
+
+    <table class="table table-hover border">
+      {# <thead>
+        <tr>
+          <th scope="col">Type</th>
+          <th scope="col">Column heading</th>
+          <th scope="col">Column heading</th>
+          <th scope="col">Column heading</th>
+        </tr>
+      </thead> #}
+      <tbody>
+        <tr class="table-light">
+          <th scope="row">Attempts</th>
+          <td>Unlimited</td>
+        </tr>
+        <tr class="table-success">
+          <th scope="row">Due date</th>
+          <td>Column content</td>
+        </tr>
+        <tr class="table-danger">
+          <th scope="row">Due date</th>
+          <td>Column content</td>
+        </tr>
+        <tr class="table-warning">
+          <th scope="row">Due date</th>
+          <td>Column content</td>
+        </tr>
+        <tr></tr>
+          <th scope="row">Time limit</th>
+          <td>No limit</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="bg-light p-3 border-top border-bottom rounded">
+    {{ assignment_html | safe }}
+    </div>
+
+    <a class="btn btn-primary mt-3" href="{{ url_for('assignment_attempt', course_id=course.id, assignment_id=assignment.id) }}" role="button">Begin attempt</a>
+    {# <button type="button" class="btn btn-primary mt-3">Begin attempt</button> #}
+{% endblock %}

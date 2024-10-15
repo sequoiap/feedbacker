@@ -1,0 +1,28 @@
+{% extends "base.html.j2" %}
+
+{% set course_navigation_bar = [
+  (url_for('course_home', course_id=course.id), 'index', 'Home'),
+  (url_for('assignments_for_course', course_id=course.id), 'assignments', 'Assignments'),
+  (url_for('course_grades', course_id=course.id), 'grades', 'Grades'),
+] -%}
+
+{% block title %}Index{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #336699; }
+    </style>
+{% endblock %}
+{% block content %}
+    <h1>Home</h1>
+    <p class="important">
+      Welcome to my the course homepage.
+    </p>
+    <p>Hello, World!</p>
+
+    <!-- <div class="list-group">
+      <a href="#" class="list-group-item list-group-item-action">Homework 1</a>
+      <a href="#" class="list-group-item list-group-item-action">Homework 2</a>
+      <a href="#" class="list-group-item list-group-item-action">Homework 3</a>
+    </div> -->
+{% endblock %}

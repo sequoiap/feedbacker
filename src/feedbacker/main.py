@@ -79,6 +79,7 @@ def get_request_id() -> Optional[str]:
     return _request_id_ctx_var.get()
 
 
+@frontend.middleware("http")
 @api.middleware("http")
 async def db_session_middleware(request: Request, call_next):
     request_id = str(uuid1())

@@ -53,7 +53,6 @@ TEMPLATE_DIR = config("TEMPLATE_DIR", default=DEFAULT_TEMPLATE_DIR)
 
 loader = FileSystemLoader([
     TEMPLATE_DIR,
-    str(ROOT_DIR / "assignments" / "templates"),
 ])
 env = Environment(loader=loader, autoescape=True)
 templates = Jinja2Templates(env=env)

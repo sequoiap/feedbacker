@@ -4,6 +4,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from starlette.requests import Request
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 
 from feedbacker.auth.models import User
@@ -24,6 +25,11 @@ def get_course_by_id(db_session: DbSession, course_id: int) -> Course:
     if not course:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
     return course
+
+
+def get_all_courses(db: Session, skip: int = 0, limit: int = 100) -> list[Course]:
+    stmt = select(Course).offset(skip).limit(limit)
+    return db.scalars(stmt).all()
 
 
 def create_course(db_session: DbSession, course_in: CourseCreate) -> Course:
