@@ -35,15 +35,18 @@ def get_env_tags(tag_list: List[str]) -> dict:
     return tags
 
 
-config = Config(".env")
+# ROOT_DIR = Path(os.path.abspath(os.path.dirname(__file__)))
+PROJ_ROOT_DIR = Path(__file__).parent.resolve()
+REPO_ROOT_DIR = PROJ_ROOT_DIR.parent.parent.resolve()
 
-ROOT_DIR = Path(os.path.abspath(os.path.dirname(__file__)))
+DEFAULT_ENV_FILE = REPO_ROOT_DIR / ".env"
+config = Config(DEFAULT_ENV_FILE)
 
 # static files
-DEFAULT_STATIC_DIR = os.path.join(
-    os.path.abspath(os.path.dirname(__file__)), os.path.join("static")
-)
+DEFAULT_STATIC_DIR = Path(__file__).parent.resolve() / "static"
 STATIC_DIR = config("STATIC_DIR", default=DEFAULT_STATIC_DIR)
+DEFAULT_UPLOADS_DIR = DEFAULT_STATIC_DIR / "uploads"
+UPLOADS_DIR = config("UPLOADS_DIR", default=DEFAULT_UPLOADS_DIR)
 
 # templates
 DEFAULT_TEMPLATE_DIR = os.path.join(
@@ -70,3 +73,7 @@ SQLALCHEMY_DATABASE_URL = config("STATIC_DIR", default=DEFAULT_DATABASE_FILE)
 FEEDBACKER_JWT_SECRET = config("FEEDBACKER_JWT_SECRET", default="supersecret")
 FEEDBACKER_JWT_ALG = config("FEEDBACKER_JWT_ALG", default="HS256")
 FEEDBACKER_JWT_EXP = config("FEEDBACKER_JWT_EXP", default=86400)  # seconds
+AUTH_COOKIE_NAME = config("AUTH_COOKIE_NAME", default="auth_token")
+REFRESH_COOKIE_NAME = config("REFRESH_COOKIE_NAME", default="refresh_token")
+
+LTSPICE_EXE = config("LTSPICE_EXE", default="")

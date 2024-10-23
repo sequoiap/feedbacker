@@ -8,7 +8,6 @@ from contextvars import ContextVar
 from fastapi import FastAPI, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-# from fastapi.templating import Jinja2Templates
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
 
@@ -24,7 +23,7 @@ from starlette.responses import Response, StreamingResponse, FileResponse
 
 from .api import api_router
 from .config import (
-    ROOT_DIR,
+    PROJ_ROOT_DIR,
     STATIC_DIR,
     TEMPLATE_DIR,
 )
@@ -90,7 +89,6 @@ async def db_session_middleware(request: Request, call_next):
     # path_params = get_path_params_from_request(request)
 
     try:
-        # session = scoped_session(sessionmaker)#, scopefunc=get_request_id)
         session = SessionLocal
         request.state.db = session()
         response = await call_next(request)
