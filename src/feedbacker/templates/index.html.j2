@@ -1,11 +1,8 @@
 {% extends "base.html.j2" %}
 {% block title %}Index{% endblock %}
-{% block head %}
+{# {% block head %}
     {{ super() }}
-    <style type="text/css">
-        .important { color: #336699; }
-    </style>
-{% endblock %}
+{% endblock %} #}
 {% block content %}
     <h1>My Courses</h1>
 
@@ -41,7 +38,7 @@
     </a>
     {% endfor %} #}
 
-    <button type="button" class="btn btn-primary mt-3">Refresh Course List</button>
+    <a href="{{ url_for('index') }}?refresh_courses=True" type="button" class="btn btn-primary mt-3">Refresh Course List</a>
 
     <!-- <form data-bitwarden-watching="1">
       <fieldset>

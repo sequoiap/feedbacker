@@ -2,12 +2,6 @@
 {% set active_page = "assignments" %}
 
 {% block title %}Assignment Details{% endblock %}
-{% block head %}
-    {{ super() }}
-    <style type="text/css">
-        .important { color: #336699; }
-    </style>
-{% endblock %}
 {% block content %}
     <h1>{{ assignment.title }}</h1>
     <div class="col">
@@ -55,6 +49,6 @@
     {{ assignment_html | safe }}
     </div>
 
-    <a class="btn btn-primary mt-3" href="{{ url_for('assignment_attempt', course_id=course.id, assignment_id=assignment.id) }}" role="button">Begin attempt</a>
+    <a class="btn btn-primary mt-3" href="{{ url_for('begin_assignment_attempt', course_id=course.id, assignment_id=assignment.id) }}" role="button">Begin attempt</a>
     {# <button type="button" class="btn btn-primary mt-3">Begin attempt</button> #}
 {% endblock %}

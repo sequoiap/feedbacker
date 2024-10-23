@@ -1,0 +1,74 @@
+{% extends "course_base.html.j2" %}
+{% set active_page = "assignments" %}
+
+{% block title %}Autograder{% endblock %}
+{% block content %}
+    <h1>{{ assignment.title }}</h1>
+    <p class="important">
+      Welcome to my awesome Autograder websocket page.
+    </p>
+
+    <div class="bg-light p-3 border-top border-bottom rounded">
+    {{ assignment_html | safe }}
+    </div>
+
+    <p>This is where the output text will be.</p>
+
+    <form action="" onsubmit="sendMessage(event)">
+      <input type="text" id="messageText" autocomplete="off"/>
+      <button>Send</button>
+    </form>
+
+    <ul id='messages'>
+    </ul>
+
+    <div class="d-flex justify-content-center">
+      <div id="spinner" class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      var ws = new WebSocket("{{ url_for('grader_ws') }}");
+      ws.onmessage = function(event) {
+          var messages = document.getElementById('messages')
+          var message = document.createElement('li')
+          var content = document.createTextNode(event.data)
+          message.appendChild(content)
+          messages.appendChild(message)
+      };
+      ws.onclose = function(event) {
+          console.log("Connection is closed...")
+          var spinner = document.getElementById('spinner')
+          if (spinner) {
+            console.log("Spinner element found");
+            spinner.style.display = 'none';
+            console.log("Spinner should be hidden now");
+          } else {
+            console.error("Spinner element not found");
+          }
+          // document.removeChild(spinner)
+      };
+      function sendMessage(event) {
+          var input = document.getElementById("messageText")
+          ws.send(input.value)
+          input.value = ''
+          event.preventDefault()
+      }
+    </script>
+{% endblock %}
+
+
+{# var ws = new WebSocket("{{ url_for('grader_ws')}}");
+ws.onopen = function() {
+    ws.send("Hello, Server!");
+};
+ws.onmessage = function (evt) {
+    var received_msg = evt.data;
+    console.log("Message is received...");
+    console.log(received_msg);
+    document.getElementById("output").innerHTML = received_msg;
+};
+ws.onclose = function() {
+    console.log("Connection is closed...");
+}; #}

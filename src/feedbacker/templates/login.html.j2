@@ -1,0 +1,28 @@
+{% extends "base.html.j2" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+    <h1>Login</h1>
+
+    <form style="max-width: 300px;" class="my-3" data-bitwarden-watching="1" action="/login?next={{ next }}" method="post">
+      {% if errors %}
+        {% for error in errors %}
+          <div class="alert alert-dismissible alert-danger">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            {{ error }}
+          </div>
+        {% endfor %}
+      {% endif %}
+      <fieldset>
+        <div class="my-3">
+          <input type="text" class="form-control" id="username" name="username" placeholder="Username" value="{{ username }}" required>
+        </div>
+        <div class="my-3">
+          <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+        </div>
+      </fieldset>
+      <div>
+        <small id="loginHelp" class="form-text text-muted">Don't have an account? <a href="#">Register</a></small>
+      </div>
+      <button type="submit" class="btn btn-primary my-4">Login</button>
+    </form>
+{% endblock %}
