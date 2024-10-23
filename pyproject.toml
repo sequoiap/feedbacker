@@ -41,6 +41,7 @@ classifiers = [
 
 dependencies = [
     "fastapi == 0.114.0",
+    "python-multipart = 0.0.9",
     "sqlalchemy[asyncio] == 2.0.34",
     "aiosqlite == 0.20.0",
     "sqlalchemy_utils == 0.41.2",
