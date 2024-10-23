@@ -3,8 +3,9 @@ from datetime import datetime, timedelta, timezone
 
 import bcrypt
 import jwt
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, Table, Integer, Column
 from sqlalchemy.orm import Mapped, relationship, mapped_column
+from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 
 from feedbacker.database import Base
 from feedbacker.config import (
@@ -41,8 +42,9 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(default=datetime.now)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.now)
     last_login_time: Mapped[Optional[datetime]] = mapped_column(nullable=True)
+    role: Mapped[list["Role"]] = relationship(secondary=lambda: user_roles_table)
 
-    roles = relationship("UserRoles", back_populates="user")
+    roles: AssociationProxy[list[str]] = association_proxy("role", "role")
 
     def check_password(self, password):
         return bcrypt.checkpw(password.encode("utf-8"), self.password)
@@ -54,25 +56,38 @@ class User(Base):
             "sub": self.username,
             "exp": exp,
             "email": self.email,
-            "roles": self.get_roles(),
+            # "roles": self.get_roles(),
+            "roles": [role for role in self.roles],
         }
         return jwt.encode(data, key=FEEDBACKER_JWT_SECRET, algorithm=FEEDBACKER_JWT_ALG)
+    
+    def check_permissions(self, required_permissions: list[str]) -> bool:
+        for permission in required_permissions:
+            if permission not in self.roles:
+                return False
+        return True
 
-    def get_roles(self) -> list[str]:
-        """Gets the user's role for a given organization slug."""
-        return [role.role for role in self.roles]
+    # def get_roles(self) -> list[str]:
+    #     """Gets the user's role for a given organization slug."""
+    #     return [role.role for role in self.roles]
 
 
-class UserRoles(Base):
+class Role(Base):
     """User roles model."""
-    __tablename__ = "user_roles"
+    __tablename__ = "roles"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     role: Mapped[str] = mapped_column(index=True)
 
-    user = relationship("User", back_populates="roles")
-
-    def __init__(self, user_id: int, role: str):
+    def __init__(self, role: str):
         if role not in UserRolesEnum:
             raise ValueError(f"Invalid role '{role}'.")
+        self.role = role
+
+
+user_roles_table: Table = Table(
+    "user_roles",
+    Base.metadata,
+    Column("user_id", Integer, ForeignKey("users.id")),
+    Column("role_id", Integer, ForeignKey("roles.id")),
+)

@@ -14,7 +14,7 @@ from fastapi.templating import Jinja2Templates
 #     CaseCostTypeUpdate,
 # )
 from feedbacker.auth.roles import UserRolesEnum
-from feedbacker.auth.service import CurrentUser, PermissionChecker
+from feedbacker.auth.service import CurrentUser, AuthorizedAPIUser
 from feedbacker.config import templates
 from feedbacker.database import DbSession
 
@@ -39,7 +39,7 @@ async def create_course(
     db_session: DbSession,
     current_user: CurrentUser,
     course_in: CourseCreate,
-    authorize: bool = Depends(PermissionChecker([UserRolesEnum.instructor])),
+    authorize: bool = Depends(AuthorizedAPIUser([UserRolesEnum.instructor])),
 ) -> CourseRead:
     """Create a new course."""
     return create_course(db_session, course_in)

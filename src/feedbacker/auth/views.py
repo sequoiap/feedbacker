@@ -88,26 +88,3 @@ async def login_for_access_token(
         )
     access_token = user.create_token()
     return Token(access_token=access_token, token_type="bearer")
-
-
-# @auth_router.post("/login")
-# async def login(
-#     request: Request,
-#     user: UserLogin,
-#     db_session: DbSession,
-# ) -> UserLoginResponse:
-#     """Login user."""
-#     pass
-
-
-# @frontend.get("/", response_class=HTMLResponse)
-# async def assignments(request: Request):
-#     return templates.TemplateResponse(
-#         request=request, name="assignment.html", context={}
-#     )
-
-# @router.get("/{id}", response_class=HTMLResponse)
-# async def read_item(request: Request, id: str):
-#     return templates.TemplateResponse(
-#         request=request, name="assignment.html", context={"id": id}
-#     )

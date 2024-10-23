@@ -1,8 +1,15 @@
-from typing import Annotated
+from typing import Annotated, Optional, Dict
 
 import jwt
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import Depends, HTTPException, Security, status, WebSocket, Cookie, WebSocketException
+from fastapi.security import (
+    OAuth2PasswordBearer,
+    OAuth2PasswordRequestForm,
+    SecurityScopes,
+    OAuth2,
+)
+from fastapi.security.utils import get_authorization_scheme_param
+from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from starlette.requests import Request
 from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
@@ -13,12 +20,56 @@ from feedbacker.database import DbSession
 from feedbacker.config import (
     FEEDBACKER_JWT_SECRET,
     FEEDBACKER_JWT_ALG,
+    AUTH_COOKIE_NAME,
+    REFRESH_COOKIE_NAME,
 )
 
 from .models import User
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+class OAuth2PasswordBearerWithCookie(OAuth2):
+    def __init__(
+        self,
+        tokenUrl: str,
+        scheme_name: Optional[str] = None,
+        scopes: Optional[Dict[str, str]] = None,
+        description: Optional[str] = None,
+        auto_error: bool = True,
+    ):
+        if not scopes:
+            scopes = {}
+        flows = OAuthFlowsModel(password={"tokenUrl": tokenUrl, "scopes": scopes})
+        super().__init__(
+            flows=flows,
+            scheme_name=scheme_name,
+            description=description,
+            auto_error=auto_error,
+        )
+
+    async def __call__(self, request: Request) -> Optional[str]:
+        authorization: str = request.cookies.get(AUTH_COOKIE_NAME)
+        scheme, param = get_authorization_scheme_param(authorization)
+        if not authorization or scheme.lower() != "bearer":
+            if self.auto_error:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Not authenticated",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            else:
+                return None
+        return param
+
+
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="auth/token",
+    scopes={
+        "admin": "Admin users",
+        "dev": "Developer users",
+        "instructor": "Instructor users",
+        "student": "Student users",
+    }
+)
 
 
 def authenticate_user(db_session: DbSession, username: str, password: str) -> User | bool:
@@ -30,7 +81,19 @@ def authenticate_user(db_session: DbSession, username: str, password: str) -> Us
     return user
 
 
-async def get_current_user(db_session: DbSession, token: Annotated[str, Depends(oauth2_scheme)]):
+def decode_token(db_session: DbSession, token: str) -> User:
+    """Decode a JWT token and return the user.
+    
+    Args:
+        db_session: The database session.
+        token: The JWT auth token.
+
+    Returns:
+        The user.
+
+    Raises:
+        HTTPException: If the token is invalid.
+    """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -48,6 +111,10 @@ async def get_current_user(db_session: DbSession, token: Annotated[str, Depends(
     if user is None:
         raise credentials_exception
     return user
+
+
+async def get_current_user(db_session: DbSession, token: Annotated[str, Depends(oauth2_scheme)]) -> User:
+    return decode_token(db_session, token)
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
@@ -86,7 +153,7 @@ def create(db_session: DbSession, user_in: UserCreate) -> User:
     return user
 
 
-class PermissionChecker:
+class AuthorizedAPIUser:
     """Check if a user has the required permissions.
 
     Based on https://dev.to/moadennagi/role-based-access-control-using-fastapi-h59.
@@ -101,11 +168,19 @@ class PermissionChecker:
     def __init__(self, required_permissions: list[str]) -> None:
         self.required_permissions = required_permissions
 
-    def __call__(self, user: CurrentUser) -> bool:
-        for r_perm in self.required_permissions:
-            if r_perm not in user.get_roles():
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail='Permission denied.'
-                )
-        return True
+    def __call__(self, user: CurrentUser) -> User:
+        if user.check_permissions(self.required_permissions):
+            return user
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Permission denied (insufficient permissions).'
+        )
+
+
+async def ws_get_cookie_or_token(
+    websocket: WebSocket,
+    session: Annotated[str | None, Cookie()] = None,
+):
+    if session is None:
+        raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
+    return session
