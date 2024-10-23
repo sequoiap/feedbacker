@@ -1,10 +1,14 @@
 import logging
 import os
+import sys
+import subprocess
+import textwrap
 
 import click
 import uvicorn
 
 from feedbacker import __version__, config
+from feedbacker.grader import grade_file
 
 # from feedbacker.enums import UserRolesEnum
 # from feedbacker.plugin.models import PluginInstance
@@ -33,6 +37,19 @@ def feedbacker_cli():
 def feedbacker_database():
     """Container for all feedbacker database commands."""
     pass
+
+
+@feedbacker_cli.command("grade")
+@click.argument("args", nargs=-1)
+def feedbacker_grade(args):
+    """Container for all feedbacker database commands."""
+    result = grade_file(args[0], args[1:])
+
+    print("Output:")
+    print(textwrap.indent(result.output.strip(), '> '))
+    print()
+    print("Score:")
+    print(textwrap.indent(str(result.score), '> '))
 
 
 @feedbacker_database.command("init")
