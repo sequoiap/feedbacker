@@ -18,13 +18,13 @@ from starlette.routing import compile_path
 from starlette.responses import Response, StreamingResponse, FileResponse
 from starlette.datastructures import MutableHeaders
 
-from feedbacker.assignments.service import get_all_assignments, get_assignment, get_attempt, create_attempt
+from feedbacker.assignments.service import get_all_assignments, get_assignment, get_attempt, create_attempt, process_attempt
 from feedbacker.assignments.schemas import AttemptCreate
 from feedbacker.exceptions import RequiresLoginException
 from feedbacker.auth.models import User
 from feedbacker.auth.service import authenticate_user, decode_token
 from feedbacker.database import DbSession
-from feedbacker.courses.service import get_all_courses, get_course_by_id, get_courses_for_user
+from feedbacker.courses.service import get_all_courses, get_course_by_id, get_courses_for_user, get_courses_instructed_for_user
 from .config import (
     STATIC_DIR,
     templates,
@@ -224,6 +224,7 @@ async def index(
     user: User = Depends(AuthorizedUser())
 ):
     courses = get_courses_for_user(db_session, user)
+    instructed_courses = get_courses_instructed_for_user(db_session, user)
     if refresh_courses:
         print("Refreshing courses")
     return templates.TemplateResponse(
@@ -231,6 +232,7 @@ async def index(
         name="index.html.j2",
         context={
             "courses": courses,
+            "instructed_courses": instructed_courses,
         },
     )
 
@@ -257,7 +259,9 @@ async def course_home(
 @frontend.get("/courses/assignments", response_class=HTMLResponse)
 async def assignments(request: Request):
     return templates.TemplateResponse(
-        request=request, name="assignments.html.j2", context={}
+        request=request,
+        name="assignments.html.j2",
+        context={},
     )
 
 
@@ -328,7 +332,11 @@ async def begin_assignment_attempt(
     user: User = Depends(AuthorizedUser()),
 ):
     assignment = get_assignment(db_session, assignment_id)
-    attempt = create_attempt(db_session, AttemptCreate(assignment_id=assignment_id, user_id=user.id))
+    attempt_id = request.cookies.get("attempt_id")
+    if attempt_id is not None:
+        attempt = get_attempt(db_session, attempt_id)
+    else:
+        attempt = create_attempt(db_session, AttemptCreate(assignment_id=assignment_id, user_id=user.id))
     # return RedirectResponse(
     #     request.url_for("assignment_attempt", course_id=course_id, assignment_id=assignment_id, attempt_id=attempt)
     # )
@@ -344,7 +352,34 @@ async def begin_assignment_attempt(
             "problems": assignment.problems,
         },
     )
-    response.set_cookie("attempt_id", attempt)
+    response.set_cookie("attempt_id", attempt.id)
+    return response
+
+
+@frontend.post("/courses/{course_id}/assignments/{assignment_id}/attempt", response_class=HTMLResponse)
+async def submit_assignment_attempt(
+    course_id: int,
+    assignment_id: int,
+    db_session: DbSession,
+    request: Request,
+):
+    assignment = get_assignment(db_session, assignment_id)
+    attempt_id = request.cookies.get("attempt_id")
+    formdata = await request.form()
+    attempt = await process_attempt(db_session, attempt_id, formdata)
+    response = templates.TemplateResponse(
+        request=request,
+        formdata=formdata,
+        name="grader.html.j2",
+        context={
+            "course": get_course_by_id(db_session, course_id),
+            "assignment": assignment,
+            "assignment_html": to_html5_demo(assignment.content),
+            "courses": get_all_courses(db_session),
+            "attempt_id": attempt_id,
+        },
+    )
+    # response.delete_cookie("attempt_id")
     return response
 
 
@@ -373,36 +408,13 @@ async def assignment_attempt(
     return response
 
 
-@frontend.post("/courses/{course_id}/assignments/{assignment_id}/attempt", response_class=HTMLResponse)
-async def submit_assignment_attempt(
+@frontend.get("/courses/{course_id}/grades", response_class=HTMLResponse)
+async def course_grades(
     course_id: int,
-    assignment_id: int,
-    # attempt_id: str,
     db_session: DbSession,
     request: Request,
-    file: UploadFile,
+    user: User = Depends(AuthorizedUser()),
 ):
-    print("Got the post")
-    assignment = get_assignment(db_session, assignment_id)
-    attempt_id = request.cookies.get("attempt_id")
-    if file:
-        print("uploaded filename:", file.filename)
-    # attempt = get_attempt(db_session, attempt_id)
-    return templates.TemplateResponse(
-        request=request,
-        name="grader.html.j2",
-        context={
-            "course": get_course_by_id(db_session, course_id),
-            "assignment": assignment,
-            "assignment_html": to_html5_demo(assignment.content),
-            "courses": get_all_courses(db_session),
-            "attempt_id": attempt_id,
-        },
-    )
-
-
-@frontend.get("/courses/{course_id}/grades", response_class=HTMLResponse)
-async def course_grades(course_id: int, db_session: DbSession, request: Request):
     return templates.TemplateResponse(
         request=request,
         name="grades.html.j2",

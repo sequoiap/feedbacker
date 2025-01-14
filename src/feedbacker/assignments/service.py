@@ -1,12 +1,30 @@
+from pathlib import Path
 from uuid import uuid4
-from typing import Annotated
+from datetime import datetime
 
-from fastapi import Depends, HTTPException, status
+import aiofiles
+from fastapi import Depends, HTTPException, status, UploadFile
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from feedbacker.config import UPLOADS_DIR
 from feedbacker.auth.service import User
-from .models import Assignment, Attempt
+from .models import (
+    Assignment,
+    Attempt,
+    MultipleChoiceOption,
+    MultipleChoiceProblem,
+    MultipleChoiceResponse,
+    MultipleSelectOption,
+    MultipleSelectProblem,
+    MultipleSelectResponse,
+    TrueFalseProblem,
+    TrueFalseResponse,
+    FileProblem,
+    FileResponse,
+    FreeResponseProblem,
+    FreeResponseResponse,
+)
 from .schemas import AttemptCreate
 
 
@@ -57,3 +75,68 @@ def create_attempt(db: Session, attempt_in: AttemptCreate) -> Attempt:
     db.add(attempt)
     db.commit()
     return attempt
+
+
+async def process_attempt(db: Session, attempt_id: int, formdata) -> Attempt:
+    attempt = get_attempt(db, attempt_id)
+    assignment = attempt.assignment
+    for problem in assignment.problems:
+        if isinstance(problem, MultipleChoiceProblem):
+            response = MultipleChoiceResponse(
+                problem_id=problem.id,
+                attempt_id=attempt.id,
+                option_id=int(formdata[f"{problem.id}"]),
+            )
+        elif isinstance(problem, MultipleSelectProblem):
+            answer_ids = [int(a) for a in formdata.getlist(f"{problem.id}")]
+            answers = db.scalars(
+                select(MultipleSelectOption)
+                .where(MultipleSelectOption.id.in_(answer_ids))
+            ).all()
+            response = MultipleSelectResponse(
+                problem_id=problem.id,
+                attempt_id=attempt.id,
+                answers=answers,
+            )
+        elif isinstance(problem, TrueFalseProblem):
+            response = TrueFalseResponse(
+                problem_id=problem.id,
+                attempt_id=attempt.id,
+                choice=formdata[f"{problem.id}"] == "true",
+            )
+        elif isinstance(problem, FileProblem):
+            file: UploadFile = formdata[f"{problem.id}"]
+            file_path = UPLOADS_DIR / f"{uuid4()}_{file.filename}"
+            async with aiofiles.open(file_path, 'wb') as out_file:
+                content = await file.read()  # async read
+                await out_file.write(content)  # async write
+            if file_path.stat().st_size == 0:
+                Path(file_path).unlink()
+                file_path = None
+            response = FileResponse(
+                problem_id=problem.id,
+                attempt_id=attempt.id,
+                file_path=file_path,
+            )
+        elif isinstance(problem, FreeResponseProblem):
+            response = FreeResponseResponse(
+                problem_id=problem.id,
+                attempt_id=attempt.id,
+                response=formdata[f"{problem.id}"],
+            )
+        else:
+            raise ValueError(f"Unknown problem type: {problem.type}")
+        db.add(response)
+
+    attempt.submitted_at = datetime.now()
+    db.add(attempt)
+    db.commit()
+    return attempt
+
+    # print(formdata)
+    # print(formdata.keys())
+    # print(formdata.values())
+    # for k in formdata.keys():
+    #     print(formdata.getlist(k))
+    # for k, v in formdata.multi_items():
+    #     print(k, v)

@@ -7,13 +7,13 @@
     <div class="ms-3">
       <fieldset>
         <div class="form-check">
-          <input class="form-check-input" type="radio" name="{{ name }}" id="trueFalseTrue{{ idx }}" value="true">
+          <input class="form-check-input" type="radio" name="{{ problem.id }}" id="trueFalseTrue{{ idx }}" value="true">
           <label class="form-check-label" for="trueFalseTrue{{ idx }}">
             True
           </label>
         </div>
         <div class="form-check">
-          <input class="form-check-input" type="radio" name="{{ name }}" id="trueFalseFalse{{ idx }}" value="false">
+          <input class="form-check-input" type="radio" name="{{ problem.id }}" id="trueFalseFalse{{ idx }}" value="false">
           <label class="form-check-label" for="trueFalseFalse{{ idx }}">
             False
           </label>
@@ -30,12 +30,43 @@
       <fieldset>
         {% for choice in problem.options %}
           <div class="form-check">
-            <input class="form-check-input" type="radio" name="{{ name }}" id="multipleChoice{{ idx }}{{ loop.index }}" value="{{ loop.index }}">
+            <input class="form-check-input" type="radio" name="{{ problem.id }}" id="multipleChoice{{ idx }}{{ loop.index }}" value="{{ choice.id }}">
             <label class="form-check-label" for="multipleChoice{{ idx }}{{ loop.index }}">
-              {{ choice }} 
+              {{ choice.text }} 
             </label>
           </div>
         {% endfor %}
+      </fieldset>
+    </div>
+  </div>
+{%- endmacro %}
+
+{% macro multipleselect(idx, problem, name) -%}
+  <div class="mt-3">
+    <p>{{ idx }}. {{ problem.text }}</p>
+    <div class="ms-3">
+      <fieldset>
+        {% for choice in problem.options %}
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="{{ problem.id }}" id="multipleSelect{{ idx }}{{ loop.index }}" value="{{ choice.id }}">
+            <label class="form-check-label" for="multipleSelect{{ idx }}{{ loop.index }}">
+              {{ choice.text }} 
+            </label>
+          </div>
+        {% endfor %}
+      </fieldset>
+    </div>
+  </div>
+{%- endmacro %}
+
+{% macro freeresponse(idx, problem, name) -%}
+  <div class="mt-3">
+    <p>{{ idx }}. {{ problem.text }}</p>
+    <div class="ms-3">
+      <fieldset>
+        <div>
+          <textarea class="form-control" name="{{ problem.id }}" id="freeResponse{{ idx }}" rows="3"></textarea>
+        </div>
       </fieldset>
     </div>
   </div>
@@ -48,7 +79,7 @@
       <fieldset>
         <div>
           {# <label for="formFile" class="form-label mt-4">Default file input example</label> #}
-          <input class="form-control" type="file" id="fileUpload" name="file">
+          <input class="form-control" type="file" id="fileUpload" name="{{ problem.id }}">
         </div>
       </fieldset>
     </div>
@@ -74,18 +105,14 @@
           {{ multiplechoice(loop.index, problem, "problem" ~ loop.index) }}
         {% elif problem.type == "file" %}
           {{ file(loop.index, problem, "problem" ~ loop.index) }}
+        {% elif problem.type == "multiple_select" %}
+          {{ multipleselect(loop.index, problem, "problem" ~ loop.index) }}
+        {% elif problem.type == "free_response" %}
+          {{ freeresponse(loop.index, problem, "problem" ~ loop.index) }}
         {% endif %}
       {% endfor %}
 
       <fieldset>
-        <div>
-          <label for="exampleTextarea" class="form-label mt-4">Example textarea</label>
-          <textarea class="form-control" id="exampleTextarea" rows="3"></textarea>
-        </div>
-        <div>
-          <label for="formFile" class="form-label mt-4">Default file input example</label>
-          <input class="form-control" type="file" id="fileUpload" name="file" required>
-        </div>
         <button type="submit" class="btn btn-primary my-3">Submit</button>
       </fieldset>
     </form>
