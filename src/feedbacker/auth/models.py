@@ -66,6 +66,12 @@ class User(Base):
             if permission not in self.roles:
                 return False
         return True
+    
+    def has_any_permission(self, permissions: list[str]) -> bool:
+        for permission in permissions:
+            if permission in self.roles:
+                return True
+        return False
 
     # def get_roles(self) -> list[str]:
     #     """Gets the user's role for a given organization slug."""
