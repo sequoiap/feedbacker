@@ -37,6 +37,11 @@ def get_courses_for_user(db_session: DbSession, user: User) -> list[Course]:
     return db_session.scalars(stmt).all()
 
 
+def get_courses_instructed_for_user(db_session: DbSession, user: User) -> list[Course]:
+    stmt = select(Course).where(Course.instructors.contains(user))
+    return db_session.scalars(stmt).all()
+
+
 def create_course(db_session: DbSession, course_in: CourseCreate) -> Course:
     instructors = db_session.execute(select(User).filter(User.id.in_(course_in.instructor_ids))).scalars().all()
     students = db_session.execute(select(User).filter(User.id.in_(course_in.student_ids))).scalars().all()
