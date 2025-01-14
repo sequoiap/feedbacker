@@ -47,6 +47,7 @@ DEFAULT_STATIC_DIR = Path(__file__).parent.resolve() / "static"
 STATIC_DIR = config("STATIC_DIR", default=DEFAULT_STATIC_DIR)
 DEFAULT_UPLOADS_DIR = DEFAULT_STATIC_DIR / "uploads"
 UPLOADS_DIR = config("UPLOADS_DIR", default=DEFAULT_UPLOADS_DIR)
+UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
 # templates
 DEFAULT_TEMPLATE_DIR = os.path.join(
