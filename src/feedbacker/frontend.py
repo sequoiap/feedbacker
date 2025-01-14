@@ -115,6 +115,10 @@ async def create_auth_header(request: Request, call_next):
     return response
 
 
+# TODO: Create middleware that adds the user to each response so that the
+# account name can be displayed on each page's dropdown menu.
+
+
 class LoginForm(BaseModel):
     username: str
     password: str
