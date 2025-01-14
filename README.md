@@ -10,6 +10,14 @@ For each app, you need to:
 1. Import its backend views and add it to the API in api.py
 1. Import at least one model from the app to ensure it is included in the database in ``__init__.py``
 
+## Configuration
+
+On first run, initialize the database:
+
+```bash
+feedbacker database init
+```
+
 ## Running the app
 
 In developer mode:
