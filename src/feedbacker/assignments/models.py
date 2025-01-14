@@ -27,8 +27,10 @@ class Assignment(Base):
         user_id: The assignment's user ID.
         grading_policy: The assignment's grading policy, either "highest",
             "latest", "first", or "average".
-        ordering: The assignment's ordering, used to sort assignments for
+        order: The assignment's ordering, used to sort assignments for
             display (default 0).
+        time_limit: The assignment's time limit in minutes (default 0). If 0,
+            there is no time limit.
 
     Attributes:
         user: The assignment's user.
@@ -44,12 +46,13 @@ class Assignment(Base):
     created_at: Mapped[datetime] = mapped_column(default=datetime.now)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.now)
     due_date: Mapped[datetime]
-    # published: Mapped[bool] = mapped_column(default=False)
+    published: Mapped[bool] = mapped_column(default=False)
     submission_limit: Mapped[int] = mapped_column(default=1)
-    # allow_late_submissions: Mapped[bool] = mapped_column(default=False)
+    allow_late_submissions: Mapped[bool] = mapped_column(default=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    # grading_policy: Mapped[str]
+    grading_policy: Mapped[str] = mapped_column(default="highest")
     order: Mapped[int] = mapped_column(default=0)
+    time_limit: Mapped[int] = mapped_column(default=0)
 
     user: Mapped[User] = relationship("User")#, back_populates="assignments")
     course: Mapped[Course] = relationship("Course", back_populates="assignments")
@@ -102,7 +105,7 @@ class Problem(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     type: Mapped[str] = mapped_column(index=True)
-    assignment_id: Mapped[int] = mapped_column(ForeignKey("assignments.id"))
+    assignment_id: Mapped[int] = mapped_column(ForeignKey("assignments.id"), nullable=True)
     text: Mapped[str] = mapped_column(default="")
     order: Mapped[int] = mapped_column(default=0)
     points: Mapped[float] = mapped_column(default=1.0)
@@ -142,11 +145,15 @@ class MultipleChoiceOption(Base):
     __tablename__ = "multiple_choice_options"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    problem_id: Mapped[int] = mapped_column(ForeignKey("multiple_choice_problems.id"))
+    problem_id: Mapped[int] = mapped_column(ForeignKey("multiple_choice_problems.id"), nullable=False)
     text: Mapped[str]
-    order: Mapped[int]
+    order: Mapped[int] = mapped_column(nullable=True)
 
-    problem: Mapped["MultipleChoiceProblem"] = relationship("MultipleChoiceProblem", back_populates="options", foreign_keys=[problem_id])
+    problem: Mapped["MultipleChoiceProblem"] = relationship(
+        "MultipleChoiceProblem",
+        back_populates="options",
+        foreign_keys=[problem_id],
+    )
 
 
 class MultipleChoiceProblem(Problem):
@@ -157,14 +164,18 @@ class MultipleChoiceProblem(Problem):
 
     id: Mapped[int] = mapped_column(ForeignKey("problems.id"), primary_key=True)
     randomize_choices: Mapped[bool] = mapped_column(default=True)
-    correct_choice_id: Mapped[int] = mapped_column(ForeignKey("multiple_choice_options.id"))
+    correct_choice_id: Mapped[int] = mapped_column(ForeignKey("multiple_choice_options.id"), nullable=True)
 
     options: Mapped[list["MultipleChoiceOption"]] = relationship(
         "MultipleChoiceOption",
         back_populates="problem",
-        foreign_keys=[MultipleChoiceOption.problem_id]
+        foreign_keys=[MultipleChoiceOption.problem_id],
     )
-    correct_choice: Mapped[int] = relationship("MultipleChoiceOption", foreign_keys=[correct_choice_id])
+    correct_choice: Mapped[int] = relationship(
+        "MultipleChoiceOption",
+        foreign_keys=[correct_choice_id],
+        post_update=True,
+    )
 
 
 class MultipleChoiceResponse(Response):
@@ -199,7 +210,7 @@ class MultipleSelectOption(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     problem_id: Mapped[int] = mapped_column(ForeignKey("multiple_select_problems.id"))
     text: Mapped[str]
-    order: Mapped[int]
+    order: Mapped[int] = mapped_column(nullable=True)
 
     problem: Mapped["MultipleSelectProblem"] = relationship("MultipleSelectProblem", back_populates="options", foreign_keys=[problem_id])
 
@@ -214,8 +225,15 @@ class MultipleSelectProblem(Problem):
     randomize_choices: Mapped[bool] = mapped_column(default=True)
     partial_credit: Mapped[bool] = mapped_column(default=False)
 
-    options: Mapped[list["MultipleSelectOption"]] = relationship("MultipleSelectOption", back_populates="problem", foreign_keys=[MultipleSelectOption.problem_id])
-    answers: Mapped[list["MultipleSelectOption"]] = relationship("MultipleSelectOption", secondary=multiple_select_answers)
+    options: Mapped[list["MultipleSelectOption"]] = relationship(
+        "MultipleSelectOption",
+        back_populates="problem",
+        foreign_keys=[MultipleSelectOption.problem_id]
+    )
+    answers: Mapped[list["MultipleSelectOption"]] = relationship(
+        "MultipleSelectOption",
+        secondary=multiple_select_answers
+    )
 
 
 multiple_select_response_answers = Table(
@@ -283,6 +301,17 @@ class FreeResponseProblem(Problem):
     }
 
     id: Mapped[int] = mapped_column(ForeignKey("problems.id"), primary_key=True)
+    full_credit_any_response: Mapped[bool] = mapped_column(default=False)
+
+
+class FreeResponseResponse(Response):
+    __tablename__ = "free_response_responses"
+    __mapper_args__ = {
+        "polymorphic_identity": "free_response",
+    }
+
+    id: Mapped[int] = mapped_column(ForeignKey("responses.id"), primary_key=True, index=True)
+    response: Mapped[str] = mapped_column()
 
 
 class FileProblem(Problem):
@@ -295,6 +324,7 @@ class FileProblem(Problem):
     grader_script: Mapped[str] = mapped_column(index=True)
 
 
+# TODO: Adapt to allow multiple file uploads
 class FileResponse(Response):
     __tablename__ = "file_responses"
     __mapper_args__ = {
@@ -302,9 +332,10 @@ class FileResponse(Response):
     }
 
     id: Mapped[int] = mapped_column(ForeignKey("responses.id"), primary_key=True, index=True)
-    file_path: Mapped[str]
+    file_path: Mapped[str] = mapped_column(nullable=True)
 
     def grade(self) -> tuple[float, str]:
+        self.problem: FileProblem
         output, status = grade_file(self.problem.grader_script, [self.file_path])
         self.score = status["score"]
         return self.score, output
