@@ -127,8 +127,9 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 #     pass
 
 
-def get_all_users(request: Request) -> list[User]:
-    return []
+def get_all_users(db_session: DbSession) -> list[User]:
+    stmt = select(User)
+    return db_session.scalars(stmt).all()
 
 
 def get(db_session: DbSession, user_id: int) -> User | None:

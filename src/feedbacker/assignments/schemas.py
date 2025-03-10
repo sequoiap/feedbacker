@@ -20,6 +20,7 @@ class AssignmentRead(AssignmentBase):
     id: int
     created_at: datetime
     updated_at: datetime
+    content: str
 
 
 class AssignmentPagination(Pagination):

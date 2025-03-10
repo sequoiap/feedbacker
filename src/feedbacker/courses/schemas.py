@@ -10,7 +10,7 @@ from feedbacker.auth.schemas import UserRead
 class CourseBase(FeedbackerBase):
     name: str
     code: str
-    description: str
+    description: Optional[str] = ""
 
 
 class CourseCreate(CourseBase):

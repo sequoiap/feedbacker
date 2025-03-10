@@ -14,6 +14,10 @@ def hash_password(password: str):
     return bcrypt.hashpw(pw, salt)
 
 
+class RoleRead(FeedbackerBase):
+    role: str
+
+
 class UserBase(FeedbackerBase):
     email: EmailStr
 
@@ -55,7 +59,7 @@ class UserRead(UserBase):
     username: str
     firstname: str
     lastname: str
-    roles: list[str] = Field([])
+    role: list[RoleRead] = Field([])
 
 
 class UserUpdate(FeedbackerBase):
