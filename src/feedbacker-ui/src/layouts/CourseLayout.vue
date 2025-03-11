@@ -23,7 +23,7 @@
 
           <q-space />
 
-          Sequoia Ploeg
+          {{ displayName}}
           <q-btn flat round dense icon="account_circle" />
         </q-toolbar>
       </div>
@@ -77,8 +77,15 @@
 </template>
 
 <script setup>
-import { ref, provide } from 'vue'
+import { ref, provide, computed } from 'vue'
+import { useAuthStore } from 'src/stores/auth';
 import EssentialLink from 'components/EssentialLink.vue'
+
+const authStore = useAuthStore()
+
+const displayName = computed(() => {
+  return `${authStore.user.firstname} ${authStore.user.lastname}`
+})
 
 const leftDrawerOpen = ref(true)
 
@@ -126,7 +133,6 @@ const linksList = [
     link: 'https://awesome.quasar.dev'
   }
 ]
-
 
 const drawerItems = ref(linksList);
 

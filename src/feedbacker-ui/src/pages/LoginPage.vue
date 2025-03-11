@@ -22,15 +22,47 @@
 </template>
 
 <script setup>
+import { useAuthStore } from 'src/stores/auth'
 import { ref } from 'vue'
+import { useQuasar } from 'quasar'
+
+const authStore = useAuthStore()
+const $q = useQuasar()
 
 const username = ref('')
 const password = ref('')
 const isPwd = ref(false)
 const isLoading = ref(false)
 
-const login = () => {
-  console.log('Logging in...')
+const login = async () => {
+  isLoading.value = true;
+  try {
+    await authStore.login(username.value, password.value)
+  }
+  catch (error) {
+    console.error('Error logging in:', error)
+    if (error == 401) {
+      $q.notify({
+        color: 'negative',
+        position: 'top-right',
+        message: 'Invalid username or password',
+        icon: 'report_problem',
+        actions: [{ label: 'Dismiss', color: 'white' }]
+      })
+    }
+    else {
+      $q.notify({
+        color: 'negative',
+        position: 'top-right',
+        message: 'An error occurred while logging in',
+        icon: 'report_problem',
+        actions: [{ label: 'Dismiss', color: 'white' }]
+      })
+    }
+  }
+  finally {
+    isLoading.value = false
+  }
 }
 </script>
 

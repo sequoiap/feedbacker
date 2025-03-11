@@ -10,7 +10,7 @@
 
           <q-space />
           
-          Sequoia Ploeg
+          {{ displayName }}
           <q-btn flat round dense icon="account_circle" />
         </q-toolbar>
       </div>
@@ -38,10 +38,12 @@
 </template>
 
 <script setup>
-// import { ref } from 'vue'
-// import EssentialLink from 'components/EssentialLink.vue'
+import { computed } from 'vue'
+import { useAuthStore } from 'src/stores/auth';
 
-// function toggleLeftDrawer () {
-//   leftDrawerOpen.value = !leftDrawerOpen.value
-// }
+const authStore = useAuthStore()
+
+const displayName = computed(() => {
+  return `${authStore.user.firstname} ${authStore.user.lastname}`
+})
 </script>
