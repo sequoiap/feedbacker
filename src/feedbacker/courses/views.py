@@ -29,9 +29,10 @@ api_router = APIRouter()
 async def get_courses(
     db_session: DbSession,
     current_user: CurrentUser,
+    user_id: int = None,
 ) -> list[CourseRead]:
     """Get all courses."""
-    return get_all_courses(db_session)
+    return get_all_courses(db_session, user_id=user_id)
 
 
 @api_router.post("/")

@@ -27,8 +27,21 @@ def get_course_by_id(db_session: DbSession, course_id: int) -> Course:
     return course
 
 
-def get_all_courses(db: Session, skip: int = 0, limit: int = 100) -> list[Course]:
-    stmt = select(Course).offset(skip).limit(limit)
+def get_all_courses(
+    db: Session, 
+    user_id: int | None = None,
+    skip: int = 0, 
+    limit: int = 100
+) -> list[Course]:
+    stmt = select(Course)
+
+    if user_id is not None:
+        stmt = stmt.where(
+            Course.instructors.any(User.id == user_id) | 
+            Course.students.any(User.id == user_id)
+        )
+    
+    stmt = stmt.offset(skip).limit(limit)
     return db.scalars(stmt).all()
 
 
