@@ -6,6 +6,7 @@ from typing import Optional, Final
 from contextvars import ContextVar
 
 from fastapi import FastAPI, Request, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -68,6 +69,21 @@ api = FastAPI(
     redoc_url="/redocs",
 )
 api.add_middleware(GZipMiddleware, minimum_size=1000)
+
+origins = [
+    "http://192.168.4.149:9000",
+    "http://127.0.0.1:8000",
+    "http://localhost",
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 REQUEST_ID_CTX_KEY: Final[str] = "request_id"

@@ -62,7 +62,7 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
 
 
 oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="auth/token",
+    tokenUrl="auth/login",
     scopes={
         "admin": "Admin users",
         "dev": "Developer users",

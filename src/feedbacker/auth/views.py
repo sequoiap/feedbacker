@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import FastAPI, APIRouter, Request, Depends, HTTPException, status
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -18,6 +18,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 # )
 # from feedbacker.config import templates
 from feedbacker import auth
+from feedbacker.config import AUTH_COOKIE_NAME, REFRESH_COOKIE_NAME
 from feedbacker.database import DbSession
 
 from .schemas import UserCreate, UserLogin, UserLoginResponse, UserRead, UserUpdate, UserPagination, Token
@@ -34,7 +35,7 @@ async def get_users(
     current_user: CurrentUser,
 # ) -> UserPagination:
 ) -> list[UserRead]:
-    """Get all assignments."""
+    """Get all users."""
     # users = get_all_users(db_session)
     # return UserPagination(total=len(users), items=users)
     return get_all_users(db_session)
@@ -74,10 +75,11 @@ def get_me(
     return current_user
 
 
-@auth_router.post("/token")
+@auth_router.post("/login")
 async def login_for_access_token(
     db_session: DbSession,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    response: Response,
 ) -> Token:
     user = authenticate_user(db_session, form_data.username, form_data.password)
     if not user:
@@ -87,4 +89,5 @@ async def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token = user.create_token()
+    response.set_cookie(key=AUTH_COOKIE_NAME, value=f"Bearer {access_token}", httponly=True, secure=False)
     return Token(access_token=access_token, token_type="bearer")
