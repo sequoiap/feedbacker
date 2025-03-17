@@ -44,6 +44,6 @@ import { useAuthStore } from 'src/stores/auth';
 const authStore = useAuthStore()
 
 const displayName = computed(() => {
-  return `${authStore.user.firstname} ${authStore.user.lastname}`
+  return `${authStore.user?.firstname} ${authStore.user?.lastname}`
 })
 </script>
