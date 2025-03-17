@@ -30,9 +30,9 @@
 
       <div style="background-color: #f8f5f0;">
         <q-toolbar inset>
-          <q-btn square flat color="primary" icon="home" label="Home" :to="{ name: 'course', params: { id: $route.params.id } }" />
-          <q-btn square flat color="primary" icon="assignment" label="Assignments" :to="{ name: 'assignments', params: { id: $route.params.id } }" />
-          <q-btn square flat color="primary" icon="grading" label="Grades" :to="{ name: 'grades', params: { id: $route.params.id } }" />
+          <q-btn square flat color="primary" icon="home" label="Home" :to="{ name: 'course', params: { id: $route.params.course_id } }" />
+          <q-btn square flat color="primary" icon="assignment" label="Assignments" :to="{ name: 'assignments', params: { id: $route.params.course_id } }" />
+          <q-btn square flat color="primary" icon="grading" label="Grades" :to="{ name: 'grades', params: { id: $route.params.course_id } }" />
         </q-toolbar>
       </div>
     </q-header>
@@ -84,7 +84,7 @@ import EssentialLink from 'components/EssentialLink.vue'
 const authStore = useAuthStore()
 
 const displayName = computed(() => {
-  return `${authStore.user.firstname} ${authStore.user.lastname}`
+  return `${authStore.user?.firstname} ${authStore.user?.lastname}`
 })
 
 const leftDrawerOpen = ref(true)

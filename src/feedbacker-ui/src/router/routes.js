@@ -21,9 +21,9 @@ const routes = [
   {
     path: '/courses',
     component: () => import('layouts/MainLayout.vue'),
-    name: 'home',
+    name: '',
     children: [
-      { path: '', component: () => import('pages/IndexPage.vue') }
+      { path: '', name: 'home', component: () => import('pages/IndexPage.vue') }
     ]
   },
 
@@ -32,22 +32,27 @@ const routes = [
     component: () => import('layouts/CourseLayout.vue'),
     children: [
       { 
-        path: ':id',
+        path: ':course_id',
         name: 'course',
         component: () => import('pages/CoursePage.vue'),
       },
       {
-        path: ':id/assignments',
+        path: ':course_id/assignments',
         name: 'assignments',
         component: () => import('pages/AssignmentsPage.vue')
       },
       {
-        path: ':id/assignments/:assnId',
+        path: ':course_id/assignments/:assignment_id',
         name: 'assignment',
         component: () => import('pages/AssignmentPage.vue')
       },
       {
-        path: ':id/grades',
+        path: ':course_id/assignments/:assignment_id/edit',
+        name: 'edit_assignment',
+        component: () => import('pages/EditAssignmentPage.vue')
+      },
+      {
+        path: ':course_id/grades',
         name: 'grades',
         component: () => import('pages/GradesPage.vue')
       }

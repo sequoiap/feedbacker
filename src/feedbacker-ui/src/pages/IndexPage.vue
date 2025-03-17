@@ -3,7 +3,7 @@
     <h1>My Courses</h1>
 
     <q-list separator>
-      <q-item clickable v-for="course in courses" :key="course.id" tag="a" :to="{ name: 'course', params: { id: course.id } }">
+      <q-item clickable v-for="course in courses" :key="course.id" tag="a" :to="{ name: 'course', params: { course_id: course.id } }">
         <q-item-section>
           <q-item-label>
             {{ course.name }}
