@@ -54,13 +54,13 @@ async def not_found(request, exc):
 exception_handlers = {404: not_found}
 
 # we create the ASGI for the app
-app = FastAPI(exception_handlers=exception_handlers, openapi_url="")
+# app = FastAPI(exception_handlers=exception_handlers, openapi_url="")
 # app.state.limiter = limiter
 # app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-app.add_middleware(GZipMiddleware, minimum_size=1000)
+# app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # we create the Web API framework
-api = FastAPI(
+app = FastAPI(
     title="Feedbacker",
     description="Welcome to feedbacker's API documentation! Here you will able to discover all of the ways you can interact with the feedbacker API.",
     root_path="/api/v1",
@@ -68,13 +68,14 @@ api = FastAPI(
     openapi_url="/docs/openapi.json",
     redoc_url="/redocs",
 )
-api.add_middleware(GZipMiddleware, minimum_size=1000)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 origins = [
     "http://192.168.4.149:9000",
     "http://127.0.0.1:8000",
     "http://localhost",
     "http://localhost:8080",
+    "http://localhost:9000",
 ]
 
 app.add_middleware(
@@ -94,8 +95,8 @@ def get_request_id() -> Optional[str]:
     return _request_id_ctx_var.get()
 
 
-@frontend.middleware("http")
-@api.middleware("http")
+# @frontend.middleware("http")
+@app.middleware("http")
 async def db_session_middleware(request: Request, call_next):
     request_id = str(uuid1())
 
@@ -118,11 +119,11 @@ async def db_session_middleware(request: Request, call_next):
 
 
 # we add all API routes to the Web API framework
-api.include_router(api_router)
+app.include_router(api_router)
 
 # we mount the frontend and app
 # if STATIC_DIR and path.isdir(STATIC_DIR):
 #     frontend.mount("/", StaticFiles(directory=STATIC_DIR), name="app")
 
-app.mount("/api/v1", app=api)
-app.mount("/", app=frontend)
+# app.mount("/api/v1", app=api)
+# app.mount("/", app=frontend)
