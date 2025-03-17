@@ -1,26 +1,38 @@
 from datetime import datetime
+from typing import Literal
 
 from feedbacker.models import FeedbackerBase, Pagination
 
 
 class AssignmentBase(FeedbackerBase):
+    pass
+
+
+class AssignmentCreate(AssignmentBase):
+    title: str
+    description: str
+    grading_policy: Literal["highest", "latest", "first", "average"]
+
+
+class AssignmentUpdate(AssignmentBase):
     title: str
     description: str
 
 
-class AssignmentCreate(AssignmentBase):
-    pass
-
-
-class AssignmentUpdate(AssignmentBase):
-    pass
-
-
 class AssignmentRead(AssignmentBase):
     id: int
+    title: str
+    description: str
+    content: str
     created_at: datetime
     updated_at: datetime
-    content: str
+    due_date: datetime
+    published: bool
+    submission_limit: int
+    allow_late_submissions: bool
+    grading_policy: str
+    order: int
+    time_limit: int
 
 
 class AssignmentPagination(Pagination):

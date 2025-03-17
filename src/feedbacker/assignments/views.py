@@ -19,7 +19,7 @@ from feedbacker.database import DbSession, SessionLocal
 from feedbacker.config import AUTH_COOKIE_NAME
 
 from .schemas import AssignmentCreate, AssignmentRead, AssignmentUpdate
-from .service import get_all_assignments
+from .service import get_all_assignments, get_assignment
 
 
 api_router = APIRouter()
@@ -29,9 +29,20 @@ api_router = APIRouter()
 async def get_assignments(
     db_session: DbSession,
     current_user: CurrentUser,
+    course_id: int = None,
 ) -> list[AssignmentRead]:
     """Get all assignments."""
-    return get_all_assignments(db_session)
+    return get_all_assignments(db_session, course_id)
+
+
+@api_router.get("/{assn_id}")
+async def get_one_assignment(
+    assn_id: int,
+    db_session: DbSession,
+    current_user: CurrentUser,
+) -> AssignmentRead:
+    """Get a specific assignment."""
+    return get_assignment(db_session, assn_id)
 
 
 @api_router.post("/attempts/{attempt_id}")
